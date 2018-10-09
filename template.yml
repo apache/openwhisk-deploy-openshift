@@ -286,6 +286,15 @@ objects:
                       "deprecated": false
                   }
               ],
+              "ruby": [
+                  {
+                      "kind": "ruby",
+                      "image": {
+                          "name": "action-ruby-v2.5"
+                      },
+                      "deprecated": false
+                  }
+              ],
               "swift": [
                   {
                       "kind": "swift",
@@ -450,28 +459,28 @@ objects:
             value: "${WHISK_KAFKA_REPLICATION_FACTOR}"
           - name: "CONFIG_whisk_kafka_topics_completed_retentionBytes"
             value: "${WHISK_KAFKA_TOPICS_COMPLETED_RETENTION_BYTES}"
-  
+
           # extra JVM arguments
           - name: "JAVA_OPTS"
             valueFrom:
               configMapKeyRef:
                 name: controller.config
                 key: java_opts
-  
+
           # extra controller arguments
           - name: "CONTROLLER_OPTS"
             valueFrom:
               configMapKeyRef:
                 name: controller.config
                 key: controller_opts
-  
+
           # action runtimes
           - name: "RUNTIMES_MANIFEST"
             valueFrom:
               configMapKeyRef:
                 name: whisk.runtimes
                 key: runtimes
-  
+
           # deployment version information
           - name:  "WHISK_VERSION_NAME"
             valueFrom:
@@ -488,7 +497,7 @@ objects:
               configMapKeyRef:
                 name: whisk.config
                 key: whisk_version_tag
-  
+
           # specify limits
           - name: "LIMITS_ACTIONS_INVOKES_PERMINUTE"
             valueFrom:
@@ -515,11 +524,11 @@ objects:
               configMapKeyRef:
                 name: whisk.limits
                 key: actions_sequence_maxLength
-  
+
           # properties for Kafka connection
           - name: "KAFKA_HOSTS"
             value: "$(STRIMZI_OPENWHISK_KAFKA_SERVICE_HOST):$(STRIMZI_OPENWHISK_KAFKA_SERVICE_PORT_CLIENTS)"
-  
+
           # properties for DB connection
           - name: "CONFIG_whisk_couchdb_username"
             valueFrom:
@@ -560,11 +569,11 @@ objects:
               configMapKeyRef:
                 name: db.config
                 key: db_whisk_auths
-  
+
           # must match port used in livenessProbe below
           - name: "PORT"
             value: "8080"
-  
+
           livenessProbe:
             httpGet:
               path: "/ping"
@@ -811,7 +820,7 @@ objects:
           configMap:
             name: invoker
         serviceAccountName: openwhisk
-  
+
         initContainers:
         - name: wait-for-services
           image: busybox
@@ -819,7 +828,7 @@ objects:
         - name: wait-for-controller
           image: busybox
           command: ['sh', '-c', 'until wget -T 5 --spider http://controller:8080/ping; do echo waiting for controller; sleep 2; done;']
-  
+
         containers:
         - name: invoker
           imagePullPolicy: IfNotPresent
@@ -840,13 +849,13 @@ objects:
           env:
             - name: "PORT"
               value: "8080"
-  
+
             # Generate stable invoker names from the StatefulSet names
             - name: "INVOKER_NAME"
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.name
-  
+
             # Docker-related options
             - name: "INVOKER_CONTAINER_NETWORK"
               valueFrom:
@@ -898,43 +907,43 @@ objects:
                 configMapKeyRef:
                   name: invoker.config
                   key: docker_registry
-  
+
             # action runtimes
             - name: "RUNTIMES_MANIFEST"
               valueFrom:
                 configMapKeyRef:
                   name: whisk.runtimes
                   key: runtimes
-  
+
             # extra JVM arguments
             - name: "JAVA_OPTS"
               valueFrom:
                 configMapKeyRef:
                   name: invoker.config
                   key: java_opts
-  
+
             # extra Invoker arguments
             - name: "INVOKER_OPTS"
               valueFrom:
                 configMapKeyRef:
                   name: invoker.config
                   key: invoker_opts
-  
+
             # Recommend using "" because logs should go to stdout on kube
             - name: "WHISK_LOGS_DIR"
               valueFrom:
                 configMapKeyRef:
                   name: invoker.config
                   key: invoker_logs_dir
-  
+
             # properties for Kafka connection
             - name: "KAFKA_HOSTS"
               value: "$(STRIMZI_OPENWHISK_KAFKA_SERVICE_HOST):$(STRIMZI_OPENWHISK_KAFKA_SERVICE_PORT_CLIENTS)"
-  
+
             # properties for zookeeper connection
             - name: "ZOOKEEPER_HOSTS"
               value: "$(STRIMZI_OPENWHISK_ZOOKEEPER_SERVICE_HOST):$(STRIMZI_OPENWHISK_ZOOKEEPER_SERVICE_PORT_CLIENTS)"
-  
+
             # properties for DB connection
             - name: "CONFIG_whisk_couchdb_username"
               valueFrom:
@@ -1078,14 +1087,14 @@ objects:
       exec nginx -c /tmp/nginx.conf -g "daemon off;"
     nginx.conf: |
       worker_rlimit_nofile 4096;
-  
+
       events {
           worker_connections  4096;
       }
-  
+
       http {
           client_max_body_size 50M;
-  
+
           rewrite_log on;
           log_format combined-upstream '$remote_addr - $remote_user [$time_local] '
               '$request $status $body_bytes_sent '
@@ -1095,7 +1104,7 @@ objects:
 
           proxy_http_version 1.1;
           proxy_set_header Connection "";
-  
+
           server {
               listen 8080 default;
 
@@ -1104,12 +1113,12 @@ objects:
               # forever
               resolver <kubernetes_service_host>;
               set $controller controller.<kubernetes_namespace>.svc.cluster.local;
-  
+
               # match namespace, note while OpenWhisk allows a richer character set for a
               # namespace, not all those characters are permitted in the (sub)domain name;
               # if namespace does not match, no vanity URL rewriting takes place.
               server_name ~^(?<namespace>[0-9a-zA-Z-]+)\.localhost$;
-  
+
               # proxy to the web action path
               location / {
                   if ($namespace) {
@@ -1118,7 +1127,7 @@ objects:
                   proxy_pass http://$controller:8080;
                   proxy_read_timeout 75s; # 70+5 additional seconds to allow controller to terminate request
               }
-  
+
               # proxy to 'public/html' web action by convention
               location = / {
                   if ($namespace) {
@@ -1127,7 +1136,7 @@ objects:
                   proxy_pass http://$controller:8080;
                   proxy_read_timeout 75s; # 70+5 additional seconds to allow controller to terminate request
               }
-  
+
               location /blackbox.tar.gz {
                   return 301 https://github.com/apache/incubator-openwhisk-runtime-docker/releases/download/sdk%400.1.0/blackbox-0.1.0.tar.gz;
               }
@@ -1135,11 +1144,11 @@ objects:
               location /blackbox-0.1.0.tar.gz {
                   return 301 /blackbox.tar.gz;
               }
-  
+
               location /OpenWhiskIOSStarterApp.zip {
                   return 301 https://github.com/openwhisk/openwhisk-client-swift/releases/download/0.2.3/starterapp-0.2.3.zip;
               }
-  
+
               # redirect requests for specific binaries to the matching one from the latest openwhisk-cli release.
               location /cli/go/download/linux/amd64 {
                   return 301 https://github.com/projectodd/openwhisk-openshift/releases/download/latest/OpenWhisk_CLI-latest-linux-amd64.tgz;
@@ -1159,7 +1168,7 @@ objects:
               location /cli/go/download/windows/386 {
                   return 301 https://github.com/projectodd/openwhisk-openshift/releases/download/latest/OpenWhisk_CLI-latest-windows-386.zip;
               }
-  
+
               # redirect top-level cli downloads to the latest openwhisk-cli release.
               location /cli/go/download {
                   return 301 https://github.com/projectodd/openwhisk-openshift/releases/latest;
