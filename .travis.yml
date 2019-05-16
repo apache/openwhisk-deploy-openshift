@@ -27,24 +27,24 @@ before_install:
 
 script:
   - ./tools/travis/scancode.sh
-  - ./tools/travis/build.sh "PROJECTODD_VERSION=openshift-travis-testing WHISK_ACTIONS_INVOKES_CONCURRENT=666"
-  - ./tools/travis/test.sh
+#  - ./tools/travis/build.sh "PROJECTODD_VERSION=openshift-travis-testing WHISK_ACTIONS_INVOKES_CONCURRENT=666"
+#  - ./tools/travis/test.sh
 
 after_failure:
   - ./tools/travis/collect-logs.sh
 
-stages:
-  - docker build
-  - test
-  - deploy
+#stages:
+#  - docker build
+#  - test
+#  - deploy
 
-jobs:
-  include:
-    - stage: docker build
-      env: OPENSHIFT_TEMPLATE=template.yml
-      before_install: skip
-      script: ./tools/travis/publish.sh openshift-travis-testing
-    - stage: deploy
-      env: OPENSHIFT_TEMPLATE=template.yml
-      before_install: skip
-      script: ./tools/travis/publish.sh
+#jobs:
+#  include:
+#    - stage: docker build
+#      env: OPENSHIFT_TEMPLATE=template.yml
+#      before_install: skip
+#      script: ./tools/travis/publish.sh openshift-travis-testing
+#    - stage: deploy
+#      env: OPENSHIFT_TEMPLATE=template.yml
+#      before_install: skip
+#      script: ./tools/travis/publish.sh
