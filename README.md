@@ -17,13 +17,17 @@
 #
 -->
 
-# OpenWhisk Deployment on OpenShift
+# DEPRECATED: OpenWhisk Deployment on OpenShift
 
 [![Build Status](https://travis-ci.org/apache/incubator-openwhisk-deploy-openshift.svg?branch=master)](https://travis-ci.org/apache/incubator-openwhisk)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](http://www.apache.org/licenses/LICENSE-2.0)
 
-This repository contains the necessary templates and compatible
-[docker](docker/) images for deploying OpenWhisk on OpenShift.
+*This repository represents an earlier effort to enable deploying
+OpenWhisk on OpenShift 3 that is no longer being actively maintained.*
+
+The community is currently focusing on extending the
+[OpenWhisk Deploy Kube](https://github.com/apache/incubator-openwhisk-deploy-kube/)
+project to also support deployment of OpenWhisk on OpenShift 4.
 
 ### What is Apache OpenWhisk
 
